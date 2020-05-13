@@ -73,21 +73,20 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
 
     imageRequester = ImageRequester(this)
 
-
-
   }
 
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    if (item.itemId == R.id.action_change_recycler_manager) {
+      changeLayoutManager()
+      return true
+    }
+    return super.onOptionsItemSelected(item)
+  }
+  
   override fun onStart() {
     super.onStart()
     if (photosList.size == 0) {
       requestPhoto()
-    }
-     fun onOptionsItemSelected(item: MenuItem): Boolean {
-      if (item.itemId == R.id.action_change_recycler_manager) {
-        changeLayoutManager()
-        return true
-      }
-      return super.onOptionsItemSelected(item)
     }
   }
 
