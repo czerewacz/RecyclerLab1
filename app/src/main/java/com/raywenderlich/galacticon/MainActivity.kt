@@ -27,6 +27,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
@@ -67,6 +68,8 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
     recyclerView.adapter = adapter
 
     setRecyclerViewScrollListener()
+    setRecyclerViewItemTouchListener()
+
 
     imageRequester = ImageRequester(this)
 
@@ -79,7 +82,7 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
     if (photosList.size == 0) {
       requestPhoto()
     }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+     fun onOptionsItemSelected(item: MenuItem): Boolean {
       if (item.itemId == R.id.action_change_recycler_manager) {
         changeLayoutManager()
         return true
@@ -106,6 +109,7 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
   }
 
   private fun setRecyclerViewScrollListener() {
+
     recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
       override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
         super.onScrollStateChanged(recyclerView, newState)
@@ -113,15 +117,38 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
         if (!imageRequester.isLoadingData && totalItemCount == lastVisibleItemPosition + 1) {
           requestPhoto()
         }
-        /* This function gives the RecyclerView a scroll listener triggered by scrolling. While scrolling,
-         the listener retrieves the count of the items in its LayoutManager and calculates the last visible
-         photo index. Once done, it compares these numbers, incrementing the index by one because the index
-         begins at zero while the count begins at one. If they match and there are no photos already on request,
-         you request a new photo.
-         */
       }
     })
   }
+  /* This function gives the RecyclerView a scroll listener triggered by scrolling. While scrolling,
+ the listener retrieves the count of the items in its LayoutManager and calculates the last visible
+ photo index. Once done, it compares these numbers, incrementing the index by one because the index
+ begins at zero while the count begins at one. If they match and there are no photos already on request,
+ you request a new photo.
+ */
+
+  private fun setRecyclerViewItemTouchListener() {
+
+    //1
+    val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+      override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, viewHolder1: RecyclerView.ViewHolder): Boolean {
+        //2
+        return false
+      }
+
+      override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
+        //3
+        val position = viewHolder.adapterPosition
+        photosList.removeAt(position)
+        recyclerView.adapter!!.notifyItemRemoved(position)
+      }
+    }
+
+    //4
+    val itemTouchHelper = ItemTouchHelper(itemTouchCallback)
+    itemTouchHelper.attachToRecyclerView(recyclerView)
+  }
+
 
   private fun changeLayoutManager() {
     if (recyclerView.layoutManager == linearLayoutManager) {
